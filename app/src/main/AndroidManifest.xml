@@ -3,6 +3,7 @@
     package="com.shael.segfaultstrategies.lahniassistant">
 
     <uses-permission android:name="android.permission.RECORD_AUDIO"/>
+    <uses-permission android:name="android.permission.CALL_PHONE"/>
     <uses-permission android:name="android.permission.SEND_SMS"/>
 
     <application
@@ -15,8 +16,11 @@
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.CALL_PRIVILEGED" />
+                <data android:scheme="tel" />
             </intent-filter>
         </activity>
     </application>

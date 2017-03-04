@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Build;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
@@ -12,12 +13,14 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
+import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import static android.speech.RecognizerIntent.EXTRA_CALLING_PACKAGE;
@@ -29,6 +32,7 @@ public class MainActivity extends Activity {
     //Permission constants
     private final int RECORD_AUDIO_PERMISSION = 1;
     private final int SEND_SMS_PERMISSION = 2;
+    private final int PHONE_CALL_PERMISSION = 3;
 
     //Views
     private Button speakButton;
@@ -42,6 +46,9 @@ public class MainActivity extends Activity {
 
     //Text to Speech
     private TextToSpeech textToSpeech;
+
+    //Send sms
+    private SmsManager smsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +75,9 @@ public class MainActivity extends Activity {
 
         SpeechRecognitionListener listener = new SpeechRecognitionListener();
         speechRecognizer.setRecognitionListener(listener);
+
+        //Send SMS
+        smsManager = SmsManager.getDefault();
 
         //Text to Speech instantiation
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
@@ -99,7 +109,7 @@ public class MainActivity extends Activity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                outputTextView.setText("There was only one catch and that was Catch-22, which specified that a concern for one's safety in the face of dangers that were real and immediate was the process of a rational mind. Orr was crazy and could be grounded. All he had to do was ask; and as soon as he did, he would no longer be crazy and would have to fly more missions. Orr would be crazy to fly more missions and sane if he didn't, but if he was sane he had to fly them. If he flew them he was crazy and didn't have to; but if he didn't want to he was sane and had to");
+
             }
         });
     }
@@ -113,10 +123,30 @@ public class MainActivity extends Activity {
         super.onPause();
     }
 
+    //smsManager.sendTextMessage("4167704050", null, "This is the text message that I am sending", null, null);
+    //dialPhoneNumber("6473837027");
+    public void dialPhoneNumber(String phoneNumber) {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + phoneNumber));
+        PackageManager packageManager = this.getPackageManager();
+        List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+        for (int j = 0 ; j < activities.size() ; j++) {
+            if (activities.get(j).toString().toLowerCase().contains("com.android.phone")) {
+                intent.setPackage("com.android.phone");
+            }
+        }
+
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
     private void requestPermissions() {
         //Permissions
         int recordAudioPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         int sendSmsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
+        int phoneCallPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
 
         if (recordAudioPermission != PackageManager.PERMISSION_GRANTED) {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
@@ -128,6 +158,11 @@ public class MainActivity extends Activity {
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.SEND_SMS}, SEND_SMS_PERMISSION);
             }
         }
+        if (phoneCallPermission != PackageManager.PERMISSION_GRANTED) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.CALL_PHONE)) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CALL_PHONE}, PHONE_CALL_PERMISSION);
+            }
+        }
     }
 
     @Override
@@ -137,6 +172,9 @@ public class MainActivity extends Activity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
                 break;
             case SEND_SMS_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
+                break;
+            case PHONE_CALL_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
                 break;
         }
