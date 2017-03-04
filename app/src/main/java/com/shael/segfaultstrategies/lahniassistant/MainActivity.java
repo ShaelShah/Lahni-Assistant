@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.provider.AlarmClock;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -33,10 +34,11 @@ public class MainActivity extends Activity {
     private final int RECORD_AUDIO_PERMISSION = 1;
     private final int SEND_SMS_PERMISSION = 2;
     private final int PHONE_CALL_PERMISSION = 3;
+    private final int SET_ALARM_PERMISSION = 4;
 
     //Views
     private Button speakButton;
-    private Button listenButton;
+    private ImageButton listenButton;
     private TextView outputTextView;
     private ImageButton settingsButton;
 
@@ -64,7 +66,7 @@ public class MainActivity extends Activity {
         speakButton = (Button) findViewById(R.id.speakButton);
         outputTextView = (TextView) findViewById(R.id.outputTextView);
         settingsButton = (ImageButton) findViewById(R.id.settingsButton);
-        listenButton = (Button) findViewById(R.id.listenButton);
+        listenButton = (ImageButton) findViewById(R.id.listenButton);
 
         //Speak Recognizer instantiation
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
@@ -83,8 +85,7 @@ public class MainActivity extends Activity {
         textToSpeech = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-//                textToSpeech.setLanguage(Locale.UK);
-                textToSpeech.setLanguage(Locale.FRENCH);
+                textToSpeech.setLanguage(Locale.UK);
             }
         });
 
@@ -109,7 +110,8 @@ public class MainActivity extends Activity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                outputTextView.setText("This");
+                startTimer("Test Message", 10);
             }
         });
     }
@@ -121,6 +123,25 @@ public class MainActivity extends Activity {
             textToSpeech.shutdown();
         }
         super.onPause();
+    }
+
+    public void startTimer(String message, int seconds) {
+        Intent intent = new Intent(AlarmClock.ACTION_SET_TIMER)
+                            .putExtra(AlarmClock.EXTRA_MESSAGE, message)
+                            .putExtra(AlarmClock.EXTRA_LENGTH, seconds)
+                            .putExtra(AlarmClock.EXTRA_SKIP_UI, true);
+
+        PackageManager packageManager = this.getPackageManager();
+        List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+
+        for (int j = 0 ; j < activities.size() ; j++) {
+            if (activities.get(j).toString().toLowerCase().contains("android.provider.AlarmClock")) {
+                intent.setPackage("android.provider.AlarmClock");
+            }
+        }
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
     }
 
     //smsManager.sendTextMessage("4167704050", null, "This is the text message that I am sending", null, null);
@@ -147,6 +168,7 @@ public class MainActivity extends Activity {
         int recordAudioPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO);
         int sendSmsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
         int phoneCallPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
+        int setAlarmCallPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SET_ALARM);
 
         if (recordAudioPermission != PackageManager.PERMISSION_GRANTED) {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
@@ -163,6 +185,11 @@ public class MainActivity extends Activity {
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.CALL_PHONE}, PHONE_CALL_PERMISSION);
             }
         }
+        if (setAlarmCallPermission != PackageManager.PERMISSION_GRANTED) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.SET_ALARM)) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.SET_ALARM}, SET_ALARM_PERMISSION);
+            }
+        }
     }
 
     @Override
@@ -177,25 +204,36 @@ public class MainActivity extends Activity {
             case PHONE_CALL_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
                 break;
+            case SET_ALARM_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
+                break;
         }
     }
 
     protected class SpeechRecognitionListener implements RecognitionListener {
 
         @Override
-        public void onReadyForSpeech(Bundle bundle) {}
+        public void onReadyForSpeech(Bundle bundle) {
+            outputTextView.setText("Ready for text");
+        }
 
         @Override
-        public void onBeginningOfSpeech() {}
+        public void onBeginningOfSpeech() {
+            outputTextView.setText("You have started speaking");
+        }
 
         @Override
         public void onRmsChanged(float v) {}
 
         @Override
-        public void onBufferReceived(byte[] bytes) {}
+        public void onBufferReceived(byte[] bytes) {
+            outputTextView.setText("Started receiving data");
+        }
 
         @Override
-        public void onEndOfSpeech() {}
+        public void onEndOfSpeech() {
+            outputTextView.setText("You have stopped talking");
+        }
 
         @Override
         public void onError(int i) {
