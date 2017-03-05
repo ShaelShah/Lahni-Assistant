@@ -2,11 +2,11 @@ package com.shael.segfaultstrategies.lahniassistant;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.AlarmClock;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -15,14 +15,29 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.os.Bundle;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 import static android.speech.RecognizerIntent.EXTRA_CALLING_PACKAGE;
 import static android.speech.RecognizerIntent.EXTRA_LANGUAGE_MODEL;
@@ -40,10 +55,17 @@ public class MainActivity extends Activity {
     //Views
     protected Button speakButton;
     protected ImageButton listenButton;
+    protected ImageButton phoneButton;
+    protected ImageButton messageButton;
     protected TextView instructionTextView;
     protected TextView confirmTextView;
     protected ImageButton settingsButton;
+    protected ImageButton cameraImageButton;
+    protected ImageView speechProgressImageView;
     protected RelativeLayout relativeLayout;
+
+    //Endpoint
+    protected String endpoint = "https://8654b187.ngrok.io/api/v1/instructions/";
 
     //Speech Recognizer
     protected SpeechRecognizer speechRecognizer;
@@ -55,8 +77,20 @@ public class MainActivity extends Activity {
     //Send sms
     protected SmsManager smsManager;
 
+    //OKHTTP
+    protected OkHttpClient client;
+
     //Variable
     private boolean isTextVisible = true;
+
+    //Emergency Contact Info
+    private String name;
+    private String number;
+
+    protected String getString;
+    protected String postString;
+    protected String[] steps;
+    protected boolean isSteps = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,10 +104,13 @@ public class MainActivity extends Activity {
 
         //View instantiation
         speakButton = (Button) findViewById(R.id.speakButton);
-        //instructionTextView = (TextView) findViewById(R.id.instructionTextView);
         confirmTextView = (TextView) findViewById(R.id.confirmTextView);
         settingsButton = (ImageButton) findViewById(R.id.settingsButton);
         listenButton = (ImageButton) findViewById(R.id.listenButton);
+        phoneButton = (ImageButton) findViewById(R.id.phoneImageButton);
+        messageButton = (ImageButton) findViewById(R.id.messageImageButton);
+        cameraImageButton = (ImageButton) findViewById(R.id.cameraImageButton);
+        speechProgressImageView = (ImageView) findViewById(R.id.speechProgressImageButton);
         relativeLayout = (RelativeLayout) findViewById(R.id.activity_main);
 
         if (findViewById(R.id.fragment_container) != null) {
@@ -82,6 +119,8 @@ public class MainActivity extends Activity {
                 getFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commit();
             }
         }
+
+        instructionTextView = (TextView) findViewById(R.id.instructionTextView);
 
         //Speak Recognizer instantiation
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
@@ -122,10 +161,13 @@ public class MainActivity extends Activity {
             }
         });
 
+        client = new OkHttpClient();
+        steps = new String[15];
+
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (isTextVisible) {
+                /*if (isTextVisible) {
                     ImageViewFragment imageViewFragment = new ImageViewFragment();
                     Bundle args = new Bundle();
                     args.putString("URL", "https://cdn1.iconfinder.com/data/icons/dinosaur/154/small-dino-dinosaur-dragon-512.png");
@@ -146,7 +188,75 @@ public class MainActivity extends Activity {
                     transaction.addToBackStack(null);
                     transaction.commit();
                     isTextVisible = true;
+                }*/
+
+                //Intent settingsIntent = new Intent(getApplicationContext(), Settings.class);
+                //startActivityForResult(settingsIntent, 1);
+
+
+                /*try {
+                    run("https://8654b187.ngrok.io/api/v1/instructions/");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
+               /* try {
+                    Log.d("JSON OUTPUT", "{\"query\":\"coffee\",");
+                    performPost("https://8654b187.ngrok.io/api/v1/instructions/", "{\"query\":\"I want to watch ellen\"}");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }*/
+
+                /*Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        String utteranceID = this.hashCode() + "";
+                        textToSpeech.speak(postString, TextToSpeech.QUEUE_FLUSH, null, utteranceID);
+                    }
+                }, 1000);*/
+
+                //String utteranceID = this.hashCode() + "";
+                //textToSpeech.speak(postString, TextToSpeech.QUEUE_FLUSH, null, utteranceID);
+            }
+        });
+
+        phoneButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean success = false;
+                if (number != null) {
+                    if (!number.equals("")) {
+                        dialPhoneNumber();
+                        success = true;
+                    }
                 }
+                if (!success) {
+                    Toast.makeText(getApplicationContext(), "No emergency number set", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        messageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                boolean success = false;
+                if (number != null) {
+                    if (!number.equals("")) {
+                        smsManager.sendTextMessage(number, null, "Sending text message to emergency contact", null, null);
+                        success = true;
+                    }
+                }
+                if (!success) {
+                    Toast.makeText(getApplicationContext(), "No emergency number set", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+
+        cameraImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
             }
         });
 
@@ -156,6 +266,20 @@ public class MainActivity extends Activity {
                 //speechRecognizer.startListening(speechRecognizerIntent);
             }
         });
+
+        client = new OkHttpClient();
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == 1) {
+            if (resultCode == RESULT_OK) {
+                name = data.getStringExtra("Name");
+                number = data.getStringExtra("Number");
+            }
+        }
     }
 
     @Override
@@ -191,11 +315,9 @@ public class MainActivity extends Activity {
         }
     }
 
-    //smsManager.sendTextMessage("4167704050", null, "This is the text message that I am sending", null, null);
-    //dialPhoneNumber("6473837027");
-    public void dialPhoneNumber(String phoneNumber) {
+    public void dialPhoneNumber() {
         Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + phoneNumber));
+        intent.setData(Uri.parse("tel:" + number));
         PackageManager packageManager = this.getPackageManager();
         List activities = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
 
@@ -266,4 +388,75 @@ public class MainActivity extends Activity {
         }
     }
 
+    public void performGet(String url) throws IOException {
+        Request request = new Request.Builder().url(url).build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, final Response response) throws IOException {
+                final String responseData = response.body().string();
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            //TextView myTextView = (TextView) findViewById(R.id.confirmTextView);
+                            //myTextView.setText(responseData);
+                            getString = responseData;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    public void performPost(String url, String json) throws IOException {
+        MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+
+        Log.d("OUTPUT", json);
+
+        RequestBody body = RequestBody.create(JSON, json);
+        Request request = new Request.Builder().url(url).post(body).build();
+        Call call = client.newCall(request);
+
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                final String responseData = response.body().string();
+                MainActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            JSONObject jObject  = new JSONObject(responseData); // json
+                            if (jObject.has("steps")) {
+                                Log.d("Output", "Has Steps");
+                                for (int i = 0; i <steps.length; i++) {
+                                    performPost(endpoint, "{\"query\":\"" + steps[i] + "\"}");
+                                }
+
+                            }
+                            String m = jObject.getString("message");
+                            postString = jObject.getString("message");
+
+                            //TextView myTextView = (TextView) findViewById(R.id.confirmTextView);
+                            //myTextView.setText(m);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                });
+            }
+        });
+    }
 }
