@@ -19,8 +19,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_settings_black_24dp"
-        android:background="@drawable/custom_background"
-        style="@android:style/Widget.Material.ImageButton"
+        android:background="@android:color/transparent"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />
 
@@ -28,7 +27,6 @@
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/custom_background"
         android:layout_below="@+id/settingsButton"
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
@@ -57,7 +55,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@android:style/Widget.Material.Button.Borderless"
-        android:background="@drawable/custom_background"
         android:layout_alignParentBottom="true"
         android:layout_alignParentStart="true"
         android:visibility="invisible"/>
@@ -68,7 +65,6 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:id="@+id/confirmTextView"
-        android:background="@drawable/custom_background"
         android:typeface="sans"
         android:textSize="20sp"
         android:paddingTop="16dp"
@@ -81,7 +77,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:src="@drawable/ic_keyboard_voice_black_24dp"
-        android:background="@drawable/custom_background"
+        android:background="@android:color/transparent"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="13dp" />

@@ -35,6 +35,7 @@ public class MainActivity extends Activity {
     private final int SEND_SMS_PERMISSION = 2;
     private final int PHONE_CALL_PERMISSION = 3;
     private final int SET_ALARM_PERMISSION = 4;
+    private final int INTERNET_PERMISSION = 5;
 
     //Views
     protected Button speakButton;
@@ -127,7 +128,8 @@ public class MainActivity extends Activity {
                 if (isTextVisible) {
                     ImageViewFragment imageViewFragment = new ImageViewFragment();
                     Bundle args = new Bundle();
-                    args.putString("URL", "URL to pass");
+                    args.putString("URL", "https://cdn1.iconfinder.com/data/icons/dinosaur/154/small-dino-dinosaur-dragon-512.png");
+                    args.putString("Message", "This is something you should do");
                     imageViewFragment.setArguments(args);
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, imageViewFragment);
@@ -214,6 +216,7 @@ public class MainActivity extends Activity {
         int sendSmsPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SEND_SMS);
         int phoneCallPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE);
         int setAlarmCallPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.SET_ALARM);
+        int internetPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET);
 
         if (recordAudioPermission != PackageManager.PERMISSION_GRANTED) {
             if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.RECORD_AUDIO)) {
@@ -235,6 +238,11 @@ public class MainActivity extends Activity {
                 ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.SET_ALARM}, SET_ALARM_PERMISSION);
             }
         }
+        if (internetPermission != PackageManager.PERMISSION_GRANTED) {
+            if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.INTERNET)) {
+                ActivityCompat.requestPermissions(this, new String[] {Manifest.permission.INTERNET}, INTERNET_PERMISSION);
+            }
+        }
     }
 
     @Override
@@ -250,6 +258,9 @@ public class MainActivity extends Activity {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
                 break;
             case SET_ALARM_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
+                break;
+            case INTERNET_PERMISSION:
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {}
                 break;
         }

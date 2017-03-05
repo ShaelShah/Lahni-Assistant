@@ -7,10 +7,19 @@
 
     <ImageView
         android:id="@+id/imageView"
+        android:layout_height="match_parent"
+        android:layout_width="match_parent"
+        android:gravity="center"
+        android:layout_weight="1"/>
+
+    <TextView
+        android:text="This is what you should do"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/imageInstructionTextView"
         android:gravity="center"
-        android:background="@drawable/custom_background"
-        android:src="@mipmap/ic_launcher"/>
+        android:typeface="sans"
+        android:textSize="16sp"
+        android:layout_weight="7"/>
 
 </LinearLayout>
