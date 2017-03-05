@@ -98,6 +98,8 @@ public class MainActivity extends Activity {
     //protected TextViewFragment textViewFragment;
     //protected ImageViewFragment imageViewFragment;
 
+    public int globalInt = 1;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

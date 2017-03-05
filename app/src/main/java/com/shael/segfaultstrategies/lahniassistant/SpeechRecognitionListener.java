@@ -54,39 +54,65 @@ class SpeechRecognitionListener implements RecognitionListener {
         mainActivity.textToSpeech.speak("I'm sorry, I didn't get that.", TextToSpeech.QUEUE_FLUSH, null, utteranceId);
     }
 
-    /*@Override
-    public void onResults(Bundle results) {
-        String hashCode = hashCode() + "";
-        switch (mainActivity.globalHackCount) {
-            case 1:
-                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
-                mainActivity.globalHackCount++;
-                break;
-            case 2:
-                mainActivity.textToSpeech.speak("Do you have the remote?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
-                mainActivity.globalHackCount++;
-                break;
-            case 3:
-                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
-                mainActivity.globalHackCount++;
-                break;
-            case 4:
-                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
-                mainActivity.globalHackCount++;
-                break;
-            case 5:
-                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
-                mainActivity.globalHackCount++;
-                break;
-            case 6:
-                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
-                mainActivity.globalHackCount++;
-                break;
-        }
-    }*/
-
     @Override
     public void onResults(Bundle results) {
+
+        mainActivity.speechProgressImageView.setImageResource(R.drawable.ic_signal_cellular_4_bar_black_24dp);
+        float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+        int maxIndex = 0;
+
+        for (int i = 1; i < scores.length; i++) {
+            if (scores[i] > scores[i - 1]) {
+                maxIndex = i;
+            }
+        }
+        mainActivity.confirmTextView.setText(matches.get(maxIndex));
+
+        String hashCode = hashCode() + "";
+        switch (mainActivity.globalInt) {
+            case 1:
+                mainActivity.instructionTextView.setText("On which device would you like to watch?");
+                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                break;
+            case 2:
+                mainActivity.instructionTextView.setText("Do you have the remote?");
+                mainActivity.textToSpeech.speak("Do you have the remote?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                break;
+            case 3:
+                mainActivity.instructionTextView.setText("Press the red button on your remote");
+                mainActivity.textToSpeech.speak("Press the red button on your remote", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                break;
+            case 4:
+                mainActivity.instructionTextView.setText("Change the channel to 456");
+                mainActivity.textToSpeech.speak("Change the channel to 456?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                break;
+            case 5:
+                mainActivity.instructionTextView.setText("Change the channel to 456");
+                mainActivity.textToSpeech.speak("Change the channel to 456", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                break;
+            case 6:
+                mainActivity.instructionTextView.setText("Enjoy the show");
+                mainActivity.textToSpeech.speak("Enjoy your show", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                if (mainActivity.globalInt == 6) {
+                    mainActivity.globalInt = 1;
+                }
+                break;
+            default:
+                mainActivity.instructionTextView.setText("I'm sorry, I don't understand your request");
+                mainActivity.textToSpeech.speak("I'm sorry, I don't understand your request", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalInt++;
+                break;
+        }
+    }
+
+    /*public void onResults(Bundle results, Bundle arg) {
             mainActivity.speechProgressImageView.setImageResource(R.drawable.ic_signal_cellular_4_bar_black_24dp);
             float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
             ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
@@ -119,7 +145,7 @@ class SpeechRecognitionListener implements RecognitionListener {
                 Log.d("ERRORERROR", "E.PRINTSTACKTRACE");
         }
     }
-
+*/
     @Override
     public void onPartialResults(Bundle bundle) {
     }
