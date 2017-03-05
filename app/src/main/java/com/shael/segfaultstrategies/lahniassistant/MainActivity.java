@@ -2,6 +2,7 @@ package com.shael.segfaultstrategies.lahniassistant;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -17,6 +18,7 @@ import android.telephony.SmsManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -40,6 +42,7 @@ public class MainActivity extends Activity {
     protected TextView instructionTextView;
     protected TextView confirmTextView;
     protected ImageButton settingsButton;
+    protected RelativeLayout relativeLayout;
 
     //Speech Recognizer
     protected SpeechRecognizer speechRecognizer;
@@ -50,6 +53,9 @@ public class MainActivity extends Activity {
 
     //Send sms
     protected SmsManager smsManager;
+
+    //Variable
+    private boolean isTextVisible = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +69,20 @@ public class MainActivity extends Activity {
 
         //View instantiation
         speakButton = (Button) findViewById(R.id.speakButton);
-        instructionTextView = (TextView) findViewById(R.id.instructionTextView);
+        //instructionTextView = (TextView) findViewById(R.id.instructionTextView);
         confirmTextView = (TextView) findViewById(R.id.confirmTextView);
         settingsButton = (ImageButton) findViewById(R.id.settingsButton);
         listenButton = (ImageButton) findViewById(R.id.listenButton);
+        relativeLayout = (RelativeLayout) findViewById(R.id.activity_main);
+
+        if (findViewById(R.id.fragment_container) != null) {
+            if (savedInstanceState == null) {
+                TextViewFragment fragment = new TextViewFragment();
+                fragment.setArguments(getIntent().getExtras());
+
+                getFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commit();
+            }
+        }
 
         //Speak Recognizer instantiation
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(this);
@@ -110,6 +126,28 @@ public class MainActivity extends Activity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                if (isTextVisible) {
+                    ImageViewFragment imageViewFragment = new ImageViewFragment();
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, imageViewFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                    isTextVisible = false;
+                } else {
+                    TextViewFragment textViewFragment = new TextViewFragment();
+                    FragmentTransaction transaction = getFragmentManager().beginTransaction();
+                    transaction.replace(R.id.fragment_container, textViewFragment);
+                    transaction.addToBackStack(null);
+                    transaction.commit();
+                    isTextVisible = true;
+                }
+            }
+        });
+
+        relativeLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                speechRecognizer.startListening(speechRecognizerIntent);
             }
         });
     }
@@ -121,6 +159,11 @@ public class MainActivity extends Activity {
             textToSpeech.shutdown();
         }
         super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
     }
 
     public void startTimer(String message, int seconds) {

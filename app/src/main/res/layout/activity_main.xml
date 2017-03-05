@@ -24,6 +24,18 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />
 
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/custom_background"
+        android:layout_below="@+id/settingsButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/confirmTextView" >
+    </FrameLayout>
+
+    <!--
     <TextView
         android:id="@+id/instructionTextView"
         android:text="How can I help you?"
@@ -37,19 +49,7 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentEnd="true"
         android:layout_above="@+id/confirmTextView" />
-
-    <TextView
-        android:text="Should I continue?"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:id="@+id/confirmTextView"
-        android:background="@drawable/custom_background"
-        android:typeface="sans"
-        android:textSize="20sp"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:layout_above="@+id/listenButton" />
+    -->
 
     <Button
         android:id="@+id/speakButton"
@@ -62,6 +62,20 @@
         android:layout_alignParentStart="true"
         android:visibility="invisible"/>
 
+    <TextView
+        android:text="Should I continue?"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/confirmTextView"
+        android:background="@drawable/custom_background"
+        android:typeface="sans"
+        android:textSize="20sp"
+        android:paddingTop="16dp"
+        android:layout_above="@+id/listenButton"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="18dp" />
+
     <ImageButton
         android:id="@+id/listenButton"
         android:layout_width="wrap_content"
@@ -69,6 +83,7 @@
         android:src="@drawable/ic_keyboard_voice_black_24dp"
         android:background="@drawable/custom_background"
         android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="13dp" />
 
 </RelativeLayout>

@@ -7,9 +7,6 @@ import android.speech.tts.TextToSpeech;
 
 import java.util.ArrayList;
 
-/**
- * Created by root on 04/03/17.
- */
 class SpeechRecognitionListener implements RecognitionListener {
 
     private MainActivity mainActivity;
