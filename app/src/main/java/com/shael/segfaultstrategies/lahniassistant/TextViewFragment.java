@@ -5,8 +5,11 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 public class TextViewFragment extends Fragment {
+
+    private String message;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -15,8 +18,19 @@ public class TextViewFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
+        if (getArguments() != null) {
+            message = getArguments().getString("Message");
+        }
         return inflater.inflate(R.layout.textview_fragment, container, false);
     }
 
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (message != null) {
+            if (!message.equals("")) {
+                ((TextView) this.getView().findViewById(R.id.instructionTextView)).setText(message);
+            }
+        }
+    }
 }

@@ -78,8 +78,6 @@ public class MainActivity extends Activity {
         if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState == null) {
                 TextViewFragment fragment = new TextViewFragment();
-                fragment.setArguments(getIntent().getExtras());
-
                 getFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commit();
             }
         }
@@ -128,6 +126,9 @@ public class MainActivity extends Activity {
             public void onClick(View view) {
                 if (isTextVisible) {
                     ImageViewFragment imageViewFragment = new ImageViewFragment();
+                    Bundle args = new Bundle();
+                    args.putString("URL", "URL to pass");
+                    imageViewFragment.setArguments(args);
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, imageViewFragment);
                     transaction.addToBackStack(null);
@@ -135,6 +136,9 @@ public class MainActivity extends Activity {
                     isTextVisible = false;
                 } else {
                     TextViewFragment textViewFragment = new TextViewFragment();
+                    Bundle args = new Bundle();
+                    args.putString("Message", "Message to put");
+                    textViewFragment.setArguments(args);
                     FragmentTransaction transaction = getFragmentManager().beginTransaction();
                     transaction.replace(R.id.fragment_container, textViewFragment);
                     transaction.addToBackStack(null);
@@ -147,7 +151,7 @@ public class MainActivity extends Activity {
         relativeLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                speechRecognizer.startListening(speechRecognizerIntent);
+                //speechRecognizer.startListening(speechRecognizerIntent);
             }
         });
     }
