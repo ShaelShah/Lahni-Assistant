@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
 import android.provider.AlarmClock;
-import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
@@ -20,7 +19,6 @@ import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
@@ -37,20 +35,21 @@ public class MainActivity extends Activity {
     private final int SET_ALARM_PERMISSION = 4;
 
     //Views
-    private Button speakButton;
-    private ImageButton listenButton;
-    private TextView outputTextView;
-    private ImageButton settingsButton;
+    protected Button speakButton;
+    protected ImageButton listenButton;
+    protected TextView instructionTextView;
+    protected TextView confirmTextView;
+    protected ImageButton settingsButton;
 
     //Speech Recognizer
-    private SpeechRecognizer speechRecognizer;
-    private Intent speechRecognizerIntent;
+    protected SpeechRecognizer speechRecognizer;
+    protected Intent speechRecognizerIntent;
 
     //Text to Speech
-    private TextToSpeech textToSpeech;
+    protected TextToSpeech textToSpeech;
 
     //Send sms
-    private SmsManager smsManager;
+    protected SmsManager smsManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,7 +63,8 @@ public class MainActivity extends Activity {
 
         //View instantiation
         speakButton = (Button) findViewById(R.id.speakButton);
-        outputTextView = (TextView) findViewById(R.id.outputTextView);
+        instructionTextView = (TextView) findViewById(R.id.instructionTextView);
+        confirmTextView = (TextView) findViewById(R.id.confirmTextView);
         settingsButton = (ImageButton) findViewById(R.id.settingsButton);
         listenButton = (ImageButton) findViewById(R.id.listenButton);
 
@@ -75,7 +75,7 @@ public class MainActivity extends Activity {
         speechRecognizerIntent.putExtra(EXTRA_LANGUAGE_MODEL, LANGUAGE_MODEL_FREE_FORM);
         speechRecognizerIntent.putExtra(EXTRA_CALLING_PACKAGE, this.getPackageName());
 
-        SpeechRecognitionListener listener = new SpeechRecognitionListener();
+        SpeechRecognitionListener listener = new SpeechRecognitionListener(this);
         speechRecognizer.setRecognitionListener(listener);
 
         //Send SMS
@@ -100,9 +100,9 @@ public class MainActivity extends Activity {
         speakButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (outputTextView.getText() != null || !outputTextView.getText().toString().equals("")) {
+                if (instructionTextView.getText() != null || !instructionTextView.getText().toString().equals("")) {
                     String utteranceId = this.hashCode() + "";
-                    textToSpeech.speak(outputTextView.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+                    textToSpeech.speak(instructionTextView.getText().toString(), TextToSpeech.QUEUE_FLUSH, null, utteranceId);
                 }
             }
         });
@@ -110,8 +110,6 @@ public class MainActivity extends Activity {
         settingsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                outputTextView.setText("This");
-                startTimer("Test Message", 10);
             }
         });
     }
@@ -210,55 +208,4 @@ public class MainActivity extends Activity {
         }
     }
 
-    protected class SpeechRecognitionListener implements RecognitionListener {
-
-        @Override
-        public void onReadyForSpeech(Bundle bundle) {
-            outputTextView.setText("Ready for text");
-        }
-
-        @Override
-        public void onBeginningOfSpeech() {
-            outputTextView.setText("You have started speaking");
-        }
-
-        @Override
-        public void onRmsChanged(float v) {}
-
-        @Override
-        public void onBufferReceived(byte[] bytes) {
-            outputTextView.setText("Started receiving data");
-        }
-
-        @Override
-        public void onEndOfSpeech() {
-            outputTextView.setText("You have stopped talking");
-        }
-
-        @Override
-        public void onError(int i) {
-            //speechRecognizer.startListening(speechRecognizerIntent);
-            outputTextView.setText("Error listening, please ask again.");
-        }
-
-        @Override
-        public void onResults(Bundle results) {
-            float[] scores  = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
-            ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-            int maxIndex = 0;
-
-            for (int i = 1; i < scores.length; i++) {
-                if (scores[i] > scores[i - 1]) {
-                    maxIndex = i;
-                }
-            }
-            outputTextView.setText("[" + maxIndex + "]" + " " + matches.get(maxIndex));
-        }
-
-        @Override
-        public void onPartialResults(Bundle bundle) {}
-
-        @Override
-        public void onEvent(int i, Bundle bundle) {}
-    }
 }

@@ -14,18 +14,6 @@
     android:clickable="true">
     <!--android:background="@android:color/holo_blue_dark"-->
 
-    <TextView
-        android:id="@+id/outputTextView"
-        android:text=""
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentEnd="true"
-        android:gravity="center"
-        android:layout_below="@+id/settingsButton"
-        android:layout_above="@+id/listenButton"
-        android:background="@drawable/custom_background"/>
-
     <ImageButton
         android:id="@+id/settingsButton"
         android:layout_width="wrap_content"
@@ -36,6 +24,33 @@
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true" />
 
+    <TextView
+        android:id="@+id/instructionTextView"
+        android:text="How can I help you?"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:background="@drawable/custom_background"
+        android:typeface="sans"
+        android:textSize="35sp"
+        android:layout_below="@+id/settingsButton"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/confirmTextView" />
+
+    <TextView
+        android:text="Should I continue?"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:id="@+id/confirmTextView"
+        android:background="@drawable/custom_background"
+        android:typeface="sans"
+        android:textSize="20sp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentEnd="true"
+        android:layout_above="@+id/listenButton" />
+
     <Button
         android:id="@+id/speakButton"
         android:text="Speak"
@@ -44,7 +59,8 @@
         style="@android:style/Widget.Material.Button.Borderless"
         android:background="@drawable/custom_background"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+        android:visibility="invisible"/>
 
     <ImageButton
         android:id="@+id/listenButton"
@@ -52,7 +68,7 @@
         android:layout_height="wrap_content"
         android:src="@drawable/ic_keyboard_voice_black_24dp"
         android:background="@drawable/custom_background"
-        android:layout_above="@+id/speakButton"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true" />
 
 </RelativeLayout>
