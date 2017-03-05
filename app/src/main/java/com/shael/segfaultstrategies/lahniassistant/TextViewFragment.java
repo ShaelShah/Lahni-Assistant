@@ -10,6 +10,7 @@ import android.widget.TextView;
 public class TextViewFragment extends Fragment {
 
     private String message;
+    private TextView textView;
 
     @Override
     public void onCreate(Bundle savedInstance) {
@@ -27,10 +28,16 @@ public class TextViewFragment extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+
         if (message != null) {
             if (!message.equals("")) {
-                ((TextView) this.getView().findViewById(R.id.instructionTextView)).setText(message);
+                textView = ((TextView) this.getView().findViewById(R.id.instructionTextView));
+                textView.setText(message);
             }
         }
+    }
+
+    public void setTextView(String message) {
+        this.textView.setText(message);
     }
 }

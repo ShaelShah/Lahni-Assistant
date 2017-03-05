@@ -2,6 +2,7 @@ package com.shael.segfaultstrategies.lahniassistant;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Fragment;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -24,6 +25,8 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -65,7 +68,8 @@ public class MainActivity extends Activity {
     protected RelativeLayout relativeLayout;
 
     //Endpoint
-    protected String endpoint = "https://8654b187.ngrok.io/api/v1/instructions/";
+    protected String endpoint = "https://9466009a.ngrok.io/api/v1/instructions/";
+    protected String intentID;
 
     //Speech Recognizer
     protected SpeechRecognizer speechRecognizer;
@@ -90,7 +94,9 @@ public class MainActivity extends Activity {
     protected String getString;
     protected String postString;
     protected String[] steps;
-    protected boolean isSteps = false;
+
+    //protected TextViewFragment textViewFragment;
+    //protected ImageViewFragment imageViewFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,12 +119,12 @@ public class MainActivity extends Activity {
         speechProgressImageView = (ImageView) findViewById(R.id.speechProgressImageButton);
         relativeLayout = (RelativeLayout) findViewById(R.id.activity_main);
 
-        if (findViewById(R.id.fragment_container) != null) {
+        /*if (findViewById(R.id.fragment_container) != null) {
             if (savedInstanceState == null) {
-                TextViewFragment fragment = new TextViewFragment();
-                getFragmentManager().beginTransaction().add(R.id.fragment_container, fragment).commit();
+                textViewFragment = new TextViewFragment();
+                getFragmentManager().beginTransaction().add(R.id.fragment_container, textViewFragment).commit();
             }
-        }
+        }*/
 
         instructionTextView = (TextView) findViewById(R.id.instructionTextView);
 
@@ -190,8 +196,8 @@ public class MainActivity extends Activity {
                     isTextVisible = true;
                 }*/
 
-                //Intent settingsIntent = new Intent(getApplicationContext(), Settings.class);
-                //startActivityForResult(settingsIntent, 1);
+                Intent settingsIntent = new Intent(getApplicationContext(), Settings.class);
+                startActivityForResult(settingsIntent, 1);
 
 
                 /*try {
@@ -416,10 +422,10 @@ public class MainActivity extends Activity {
         });
     }
 
-    public void performPost(String url, String json) throws IOException {
+    public void performPost(String url, final String json) throws IOException {
         MediaType JSON = MediaType.parse("application/json; charset=utf-8");
 
-        Log.d("OUTPUT", json);
+        //Log.d("OUTPUT", json);
 
         RequestBody body = RequestBody.create(JSON, json);
         Request request = new Request.Builder().url(url).post(body).build();
@@ -438,20 +444,32 @@ public class MainActivity extends Activity {
                     @Override
                     public void run() {
                         try {
-                            JSONObject jObject  = new JSONObject(responseData); // json
+                            JSONObject jObject = new JSONObject(responseData);
+
+                            Log.d("JOBJECTOUTPUT", jObject.toString());
+
                             if (jObject.has("steps")) {
-                                Log.d("Output", "Has Steps");
-                                for (int i = 0; i <steps.length; i++) {
-                                    performPost(endpoint, "{\"query\":\"" + steps[i] + "\"}");
+                                ArrayList<String> listData = new ArrayList<>();
+                                JSONArray jArray = jObject.getJSONArray("steps");
+                                if (jArray != null) {
+                                    for (int i = 0; i < jArray.length(); i++) {
+                                        listData.add(jArray.getString(i));
+                                    }
                                 }
 
-                            }
-                            String m = jObject.getString("message");
-                            postString = jObject.getString("message");
+                                for (String s : listData) {
+                                    Log.d("ARRAY OUTPUT", s);
+                                    textToSpeech.speak(s, TextToSpeech.QUEUE_FLUSH, null, hashCode() + "");
 
-                            //TextView myTextView = (TextView) findViewById(R.id.confirmTextView);
-                            //myTextView.setText(m);
-                        } catch (Exception e) {
+                                    //speechRecognizer.startListening(speechRecognizerIntent);
+                                }
+
+
+                            }
+                            postString = jObject.getString("message");
+                            intentID = jObject.getString("intentID");
+                        } catch (JSONException e) {
+                            Log.d("JSON EXCEPTION", "We failed fam");
                             e.printStackTrace();
                         }
                     }
@@ -460,3 +478,10 @@ public class MainActivity extends Activity {
         });
     }
 }
+
+
+                            /*for (int i = 0; i <steps.length; i++) {
+                                //performPost(endpoint, "{\"query\":\"" + steps[i] + "\"}");
+                                String utteranceId = this.hashCode() + "";
+                                textToSpeech.speak(steps[i], TextToSpeech.QUEUE_FLUSH, null, utteranceId);
+                            }*/

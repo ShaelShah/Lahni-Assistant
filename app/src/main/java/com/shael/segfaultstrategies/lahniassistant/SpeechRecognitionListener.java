@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.speech.RecognitionListener;
 import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
+import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -47,48 +48,75 @@ class SpeechRecognitionListener implements RecognitionListener {
 
     @Override
     public void onError(int i) {
-        //speechRecognizer.startListening(speechRecognizerIntent);
-        //mainActivity.confirmTextView.setText("Error listening, please ask again.");
         mainActivity.speechProgressImageView.setImageAlpha(R.drawable.ic_signal_cellular_0_bar_black_24dp);
 
         String utteranceId = this.hashCode() + "";
         mainActivity.textToSpeech.speak("I'm sorry, I didn't get that.", TextToSpeech.QUEUE_FLUSH, null, utteranceId);
     }
 
+    /*@Override
+    public void onResults(Bundle results) {
+        String hashCode = hashCode() + "";
+        switch (mainActivity.globalHackCount) {
+            case 1:
+                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalHackCount++;
+                break;
+            case 2:
+                mainActivity.textToSpeech.speak("Do you have the remote?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalHackCount++;
+                break;
+            case 3:
+                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalHackCount++;
+                break;
+            case 4:
+                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalHackCount++;
+                break;
+            case 5:
+                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalHackCount++;
+                break;
+            case 6:
+                mainActivity.textToSpeech.speak("On which device would you like to watch?", TextToSpeech.QUEUE_FLUSH, null, hashCode);
+                mainActivity.globalHackCount++;
+                break;
+        }
+    }*/
+
     @Override
     public void onResults(Bundle results) {
-        mainActivity.speechProgressImageView.setImageResource(R.drawable.ic_signal_cellular_4_bar_black_24dp);
-        float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
-        ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
-        int maxIndex = 0;
+            mainActivity.speechProgressImageView.setImageResource(R.drawable.ic_signal_cellular_4_bar_black_24dp);
+            float[] scores = results.getFloatArray(SpeechRecognizer.CONFIDENCE_SCORES);
+            ArrayList<String> matches = results.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+            int maxIndex = 0;
 
-        for (int i = 1; i < scores.length; i++) {
-            if (scores[i] > scores[i - 1]) {
-                maxIndex = i;
+            for (int i = 1; i < scores.length; i++) {
+                if (scores[i] > scores[i - 1]) {
+                    maxIndex = i;
+                }
             }
-        }
-        mainActivity.confirmTextView.setText("[" + maxIndex + "]" + " " + matches.get(maxIndex));
+            mainActivity.confirmTextView.setText(matches.get(maxIndex));
+            String json = "{\"query\":\"" + matches.get(maxIndex) + "\"}";
 
-        String json = "{\"query\":\"" + matches.get(maxIndex) + "\"}";
+            try {
+                mainActivity.performPost(mainActivity.endpoint, json);
 
-        //mainActivity.instructionTextView.setText(matches.get(maxIndex));
-        //mainActivity.confirmTextView.setText(matches.get(maxIndex));
-        try {
-            //mainActivity.confirmTextView.setText(json);
-            mainActivity.performPost(mainActivity.endpoint, json);
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
 
-            Handler handler = new Handler();
-            handler.postDelayed(new Runnable() {
-
-            @Override
-            public void run() {
-                String utteranceID = this.hashCode() + "";
-                mainActivity.confirmTextView.setText(mainActivity.postString);
-                mainActivity.textToSpeech.speak(mainActivity.postString, TextToSpeech.QUEUE_FLUSH, null, utteranceID);
-            }
+                    @Override
+                    public void run() {
+                        mainActivity.instructionTextView.setText(mainActivity.postString);
+                        String utteranceID = this.hashCode() + "";
+                        mainActivity.textToSpeech.speak(mainActivity.postString, TextToSpeech.QUEUE_FLUSH, null, utteranceID);
+                        //mainActivity.postString = "";
+                    }
             }, 2000);
         } catch (IOException e) {
-            e.printStackTrace();
+                //Log.d("", "" + e.printStackTrace());
+                Log.d("ERRORERROR", "E.PRINTSTACKTRACE");
         }
     }
 
